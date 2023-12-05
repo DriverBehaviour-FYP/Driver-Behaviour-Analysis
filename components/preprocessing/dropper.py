@@ -13,6 +13,12 @@ class Dropper( BaseEstimator, TransformerMixin):
   def transform(self, X):
     print(f"****************************Dropping {self.month_pointer}")
     additional_columns = ['servertime','fixtime','address','routeid']
-    dropped_df = X.drop(additional_columns, axis=1)
+
+    drop_columns = []
+    for col in additional_columns:
+      if col in X.columns:
+        drop_columns.append(col)
+    
+    dropped_df = X.drop(drop_columns, axis=1)
     dropped_df.to_csv( self.path_to_temp + "CL_DR/"+ self.month_pointer + "_C_D.csv", index = False)
     return dropped_df
