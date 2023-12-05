@@ -6,6 +6,7 @@ from components.preprocessing.trip_segmeter import TripSegmenterByTime
 from components.preprocessing.elevation_injector import ElevationInjector
 from components.preprocessing.feature_calculator import FeatureCalculator
 from components.preprocessing.standardizer import Standardizer
+from components.preprocessing.elevation_feature import ElevationForSegment
 from sklearn.pipeline import Pipeline
 
 global previous_trip_max, previous_segment_max, month_pointer, bus_terminals, path_to_temp
@@ -43,9 +44,18 @@ if __name__ == '__main__':
             ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
             ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
             ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
-            # ("CalculateFeatures", CalculateFeatures()),
+            ("ElevationFeatures", ElevationForSegment(month_pointer, path_to_temp)),# save point there
         ])
 
+        # pipe = Pipeline([
+        #     ("ElevationFeatures", ElevationForSegment(month_pointer, path_to_temp)),# save point there
+        # ])
+
+        # gps_data=get_data_from_path(path_to_temp+"TR_SG_BT/digana_2021_10_gps_data.csv")
+        # segments=get_data_from_path(path_to_temp+"TR_SG_BT/digana_2021_10_segments.csv")
+        # bus_trips=get_data_from_path(path_to_temp+"TR_EX/digana_2021_10_bus_trips.csv")
         gps_data, segments, bus_trips = pipe.fit_transform(raw_data)
+        # gps_data, segments, bus_trips = pipe.fit_transform((gps_data,segments,bus_trips))
         previous_trip_max += len(bus_trips)
         previous_segment_max += len(segments)
+        
