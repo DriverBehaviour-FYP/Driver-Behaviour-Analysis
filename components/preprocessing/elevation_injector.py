@@ -13,7 +13,7 @@ class ElevationInjector( BaseEstimator, TransformerMixin):
 
   def transform(self, X):
     print(f"****************************Elevation Injecting {self.month_pointer}")
-    gps_data, segments_df, bus_trips_ts = X
+    gps_data, bus_trips_df, trip_ends_df = X
 
     # print(type(gps_data))
 
@@ -33,10 +33,8 @@ class ElevationInjector( BaseEstimator, TransformerMixin):
 
     # saving point
     gps_data.to_csv( self.path_to_temp + "EL_IJ/" + self.month_pointer + "_gps_data.csv", index = False)
-    segments_df.to_csv( self.path_to_temp + "EL_IJ/" + self.month_pointer + "_segments_data.csv", index = False)
-    bus_trips_ts.to_csv( self.path_to_temp + "EL_IJ/" + self.month_pointer + "_bus_trips_data.csv", index = False)
 
-    return gps_data, segments_df, bus_trips_ts
+    return gps_data, bus_trips_df, trip_ends_df
 
   def send_request(self, base_url, params, timeout=5, max_retries=3):
 
