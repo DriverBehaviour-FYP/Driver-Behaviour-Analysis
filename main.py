@@ -41,8 +41,8 @@ if __name__ == '__main__':
             ("cleaner", Cleaner(month_pointer)),
             ("dropper", Dropper(month_pointer, path_to_temp)),   # need a saving point here
             ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
-            ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
             ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
+            ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
             # ("CalculateFeatures", CalculateFeatures()),
         ])
 

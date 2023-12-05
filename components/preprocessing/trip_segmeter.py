@@ -1,6 +1,7 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 from datetime import datetime, timedelta
+import math
 
 
 class TripSegmenterByTime( BaseEstimator, TransformerMixin):
@@ -27,7 +28,7 @@ class TripSegmenterByTime( BaseEstimator, TransformerMixin):
       start_time = pd.Timestamp(parsed_date)
 
       # Generate a range of 3-minute intervals for the current record
-      time_intervals = pd.date_range(start=start_time, periods=duration, freq='3T')
+      time_intervals = pd.date_range(start=start_time, periods=math.ceil(duration/3), freq='3T')
 
       # Iterate over the time intervals and create a new record for each interval
       for interval in time_intervals:
