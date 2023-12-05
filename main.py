@@ -3,6 +3,7 @@ from components.preprocessing.cleaner import Cleaner
 from components.preprocessing.dropper import Dropper
 from components.preprocessing.trip_extractor import TripExtractor
 from components.preprocessing.trip_segmeter import TripSegmenterByTime
+from components.preprocessing.elevation_injector import ElevationInjector
 from components.preprocessing.feature_calculator import FeatureCalculator
 from components.preprocessing.standardizer import Standardizer
 from sklearn.pipeline import Pipeline
@@ -41,7 +42,7 @@ if __name__ == '__main__':
             ("dropper", Dropper(month_pointer, path_to_temp)),   # need a saving point here
             ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
             ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
-            # ("InjectElevations",ElevationInjector()),  # save point there
+            ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
             # ("CalculateFeatures", CalculateFeatures()),
         ])
 
