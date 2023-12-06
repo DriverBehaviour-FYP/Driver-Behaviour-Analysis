@@ -8,6 +8,7 @@ from components.preprocessing.feature_calculator import FeatureCalculator
 from components.preprocessing.standardizer import Standardizer
 from components.preprocessing.acceleration_calculator import AccelerationCalculator
 from components.preprocessing.stopping_frequency_for_segment import StoppingFrequencyForSegment
+from components.preprocessing.radial_acceleration import CalculateRadialAcceleration
 from sklearn.pipeline import Pipeline
 
 global previous_trip_max, previous_segment_max, month_pointer, bus_terminals, path_to_temp
@@ -48,6 +49,7 @@ if __name__ == '__main__':
             # ("CalculateFeatures", CalculateFeatures()),
             ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp)),
             ("StoppingFrequencyForSegment",StoppingFrequencyForSegment()),
+            ("CalculateRadialAcceleration",CalculateRadialAcceleration()),
         ])
 
         gps_data, segments, bus_trips = pipe.fit_transform(raw_data)
