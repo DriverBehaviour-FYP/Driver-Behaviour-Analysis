@@ -6,6 +6,7 @@ from components.preprocessing.trip_segmeter import TripSegmenterByTime
 from components.preprocessing.elevation_injector import ElevationInjector
 from components.preprocessing.feature_calculator import FeatureCalculator
 from components.preprocessing.standardizer import Standardizer
+from components.preprocessing.acceleration_calculator import AccelerationCalculator
 from sklearn.pipeline import Pipeline
 
 global previous_trip_max, previous_segment_max, month_pointer, bus_terminals, path_to_temp
@@ -44,6 +45,7 @@ if __name__ == '__main__':
             ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
             ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
             # ("CalculateFeatures", CalculateFeatures()),
+            ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp)),
         ])
 
         gps_data, segments, bus_trips = pipe.fit_transform(raw_data)
