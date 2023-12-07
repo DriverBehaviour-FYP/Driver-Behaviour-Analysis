@@ -6,7 +6,9 @@ from components.preprocessing.trip_segmeter import TripSegmenterByTime
 from components.preprocessing.elevation_injector import ElevationInjector
 from components.preprocessing.feature_calculator import FeatureCalculator
 from components.preprocessing.standardizer import Standardizer
-from components.preprocessing.elevation_feature import ElevationForSegment
+from components.preprocessing.acceleration_calculator import AccelerationCalculator
+from components.preprocessing.stopping_frequency_for_segment import StoppingFrequencyForSegment
+from components.preprocessing.radial_acceleration import CalculateRadialAcceleration
 from sklearn.pipeline import Pipeline
 
 global previous_trip_max, previous_segment_max, month_pointer, bus_terminals, path_to_temp
@@ -44,7 +46,11 @@ if __name__ == '__main__':
             ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
             ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
             ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
-            ("ElevationFeatures", ElevationForSegment(month_pointer, path_to_temp)),# save point there
+
+            # ("CalculateFeatures", CalculateFeatures()),
+            ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp)),
+            ("StoppingFrequencyForSegment",StoppingFrequencyForSegment()),
+            ("CalculateRadialAcceleration",CalculateRadialAcceleration()),
         ])
 
         # pipe = Pipeline([
