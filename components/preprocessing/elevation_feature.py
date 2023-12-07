@@ -17,10 +17,10 @@ class ElevationForSegment( BaseEstimator, TransformerMixin):
 
     segment_id_list = segments_ts['segment_id'].unique()
 
-    elevation_p=[]
-    elevation_n=[]
-    ac_elevation_p=[]
-    ac_elevation_n=[]
+    elevation_p=[] #avg positive elevation for segments
+    elevation_n=[] #avg negative elevation for segments
+    ac_elevation_p=[] #accumilated positive sum of elevation angle X avg speed of adjest two points
+    ac_elevation_n=[] #accumilated negative sum of elevation angle X avg speed of adjest two points
 
     for segment_id in segment_id_list:
       sum_elevation_p=0
@@ -35,14 +35,15 @@ class ElevationForSegment( BaseEstimator, TransformerMixin):
         elevation = select_segment['elevation'][i+1]-select_segment['elevation'][i]
         displacement = self.distance(select_segment['latitude'][i+1],select_segment['latitude'][i],select_segment['longitude'][i+1],select_segment['longitude'][i])
         if(elevation != 0 and displacement!=0):
-          angle_sin = elevation/displacement
-          if(angle_sin>0):
-            sum_elevation_p+=angle_sin
-            ac_sum_elevation_p+=angle_sin*(select_segment['speed'][i+1]+select_segment['speed'][i])/2
+        #   angle_sin = elevation/(math.sqrt(displacement**2+elevation**2))
+          angle_tan = elevation/displacement
+          if(angle_tan>0):
+            sum_elevation_p+=angle_tan
+            ac_sum_elevation_p+=angle_tan*(select_segment['speed'][i+1]+select_segment['speed'][i])/2
             count_p+=1
-          elif(angle_sin<0):
-            sum_elevation_n+=angle_sin
-            ac_sum_elevation_n+=abs(angle_sin)*(select_segment['speed'][i+1]+select_segment['speed'][i])/2
+          elif(angle_tan<0):
+            sum_elevation_n+=angle_tan
+            ac_sum_elevation_n+=abs(angle_tan)*(select_segment['speed'][i+1]+select_segment['speed'][i])/2
             count_n+=1
 
 
