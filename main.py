@@ -8,6 +8,7 @@ from components.preprocessing.feature_calculator import FeatureCalculator
 from components.preprocessing.standardizer import Standardizer
 from components.preprocessing.acceleration_calculator import AccelerationCalculator
 from components.preprocessing.stopping_frequency_for_segment import StoppingFrequencyForSegment
+from components.preprocessing.elevation_feature import ElevationForSegment
 from components.preprocessing.radial_acceleration import CalculateRadialAcceleration
 from sklearn.pipeline import Pipeline
 
@@ -38,30 +39,29 @@ if __name__ == '__main__':
         month_pointer = dataset_names[ds].split(".")[0]
         print("---------------------------------------------------", month_pointer, "------------------------------------------------")
         raw_data = get_data_from_path(path_raw_data)
-        
+
+        # load data for feature calculation 
+        segemnts = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_SG_BT/' + month_pointer + "_segments.csv")
+        gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_SG_BT/' + month_pointer + "_gps_data.csv")
+
         # config pipeline
         pipe = Pipeline([
-            ("cleaner", Cleaner(month_pointer)),
-            ("dropper", Dropper(month_pointer, path_to_temp)),   # need a saving point here
-            ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
-            ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
-            ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
-
-            # ("CalculateFeatures", CalculateFeatures()),
-            ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp)),
-            ("StoppingFrequencyForSegment",StoppingFrequencyForSegment()),
-            ("CalculateRadialAcceleration",CalculateRadialAcceleration()),
+            # ("cleaner", Cleaner(month_pointer)),
+            # ("dropper", Dropper(month_pointer, path_to_temp)),   # need a saving point here
+            # ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
+            # ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
+            # ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
+            ("CalculateFeatures", FeatureCalculator(month_pointer,path_to_temp))
+            # ("ElevationFeatureCalculator", ElevationForSegment(month_pointer,path_to_temp)),
+            # ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp)),
+            # ("StoppingFrequencyForSegment",StoppingFrequencyForSegment(month_pointer,path_to_temp)),
+            # ("CalculateRadialAcceleration",CalculateRadialAcceleration(month_pointer,path_to_temp)),
         ])
 
-        # pipe = Pipeline([
-        #     ("ElevationFeatures", ElevationForSegment(month_pointer, path_to_temp)),# save point there
-        # ])
+        # gps_data, segments, bus_trips = pipe.fit_transform((gps_data, segemnts))
+        gps_data, segments = pipe.fit_transform((gps_data, segemnts))
+        # previous_trip_max += len(bus_trips)
+        # previous_segment_max += len(segments)
 
-        # gps_data=get_data_from_path(path_to_temp+"TR_SG_BT/digana_2021_10_gps_data.csv")
-        # segments=get_data_from_path(path_to_temp+"TR_SG_BT/digana_2021_10_segments.csv")
-        # bus_trips=get_data_from_path(path_to_temp+"TR_EX/digana_2021_10_bus_trips.csv")
-        gps_data, segments, bus_trips = pipe.fit_transform(raw_data)
-        # gps_data, segments, bus_trips = pipe.fit_transform((gps_data,segments,bus_trips))
-        previous_trip_max += len(bus_trips)
-        previous_segment_max += len(segments)
+        
         

@@ -13,7 +13,7 @@ class ElevationForSegment( BaseEstimator, TransformerMixin):
 
   def transform(self, X):
     print(f"**************************** Elevation For Segment {self.month_pointer}")
-    gps_data,segments_ts,bus_trips = X
+    gps_data,segments_ts = X
 
     segment_id_list = segments_ts['segment_id'].unique()
 
@@ -61,7 +61,7 @@ class ElevationForSegment( BaseEstimator, TransformerMixin):
     segments_ts.to_csv( self.path_to_temp + "EL_FC/" + self.month_pointer + "_segments.csv", index = False)
     
      
-    return gps_data,segments_ts,bus_trips
+    return gps_data,segments_ts
 
   def distance(self, lat1, lat2, lon1, lon2):
      
