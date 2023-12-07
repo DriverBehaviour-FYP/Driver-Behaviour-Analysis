@@ -6,10 +6,11 @@ import math
 
 class TripSegmenterByTime( BaseEstimator, TransformerMixin):
   
-  def __init__(self, month_pointer, path_to_temp, previous_segment_max):
+  def __init__(self, month_pointer, path_to_temp, previous_segment_max, seg_duration_in_mins = 3):
     self.month_pointer = month_pointer
     self.path_to_temp = path_to_temp
     self.previous_segment_max = previous_segment_max
+    self.seg_duration_in_mins = seg_duration_in_mins
 
   def fit(self, X, y=None):
     return self
@@ -27,12 +28,12 @@ class TripSegmenterByTime( BaseEstimator, TransformerMixin):
       parsed_date = datetime.strptime(date_string, format_string)
       start_time = pd.Timestamp(parsed_date)
 
-      # Generate a range of 3-minute intervals for the current record
-      time_intervals = pd.date_range(start=start_time, periods=math.ceil(duration/3), freq='3T')
+      # Generate a range of segment_duration-minute intervals for the current record
+      time_intervals = pd.date_range(start=start_time, periods=math.ceil(duration/self.seg_duration_in_mins), freq=f'{self.seg_duration_in_mins}T')
 
       # Iterate over the time intervals and create a new record for each interval
       for interval in time_intervals:
-          end_time = interval + timedelta(minutes=3)
+          end_time = interval + timedelta(minutes=self.seg_duration_in_mins)
 
           segment_starting_time = pd.to_datetime(interval)
           segment_ending_time = pd.to_datetime(end_time)
