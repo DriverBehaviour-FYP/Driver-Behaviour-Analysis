@@ -41,8 +41,8 @@ if __name__ == '__main__':
         raw_data = get_data_from_path(path_raw_data)
 
         # load data for feature calculation 
-        segemnts = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_SG_BT/' + month_pointer + "_segments.csv")
-        gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_SG_BT/' + month_pointer + "_gps_data.csv")
+        segemnts = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/AC_SF_CAL/' + month_pointer + "_segments.csv")
+        gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/AC_SF_CAL/' + month_pointer + "_gps_data.csv")
 
         # config pipeline
         pipe = Pipeline([
