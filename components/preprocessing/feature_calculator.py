@@ -16,6 +16,7 @@ class FeatureCalculator(BaseEstimator, TransformerMixin):
         gps_data_df, segments_df = X
         max_speeds = []
         speed_variences = []
+        speed_averages = []
         for index, row in segments_df.iterrows():
             segment_id = row["segment_id"]
             speeds = gps_data_df[gps_data_df["segment_id"] == segment_id]["speed"].values
@@ -27,8 +28,18 @@ class FeatureCalculator(BaseEstimator, TransformerMixin):
                 variation = None
             max_speeds.append(max_speed)
             speed_variences.append(variation)
+
+            # calculating non-zero speed sum
+            non_zero_speed_sum = 0
+            count = 0
+            for spd in speeds:
+                if spd>0:
+                    non_zero_speed_sum+= spd
+                    count+=1
+            speed_averages.append(non_zero_speed_sum/count if count!=0 else 0)
+        segments_df['average_speed'] = speed_averages
         segments_df["max_speed"] = max_speeds
-        segments_df["variation"] = speed_variences
+        segments_df["speed_variation"] = speed_variences
 
         gps_data_df.to_csv( self.path_to_temp + "SP_FC/" + self.month_pointer + "_gps_data.csv", index = False)
         segments_df.to_csv( self.path_to_temp + "SP_FC/" + self.month_pointer + "_segments.csv", index = False)
