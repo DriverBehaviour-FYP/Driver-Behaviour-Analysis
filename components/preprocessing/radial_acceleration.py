@@ -75,9 +75,10 @@ def lat_lon_to_utm(lat, lon):
 # put your calculate_radial_acceleration_for_trip here
 class CalculateRadialAcceleration(BaseEstimator, TransformerMixin):
 
-    def __init__(self, month_pointer, path_to_temp):
+    def __init__(self, month_pointer, path_to_temp, seg_pointer):
         self.month_pointer = month_pointer
         self.path_to_temp = path_to_temp
+        self.seg_pointer = seg_pointer
 
     def fit(self, X, y=None):
         return self

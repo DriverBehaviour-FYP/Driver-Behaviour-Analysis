@@ -1,11 +1,13 @@
 from sklearn.base import BaseEstimator, TransformerMixin
+from utils.local.save_data import save_data
 from math import radians, cos, sin, asin, sqrt
 
 class ElevationForSegment( BaseEstimator, TransformerMixin):
 
-  def __init__(self, month_pointer, path_to_temp):
+  def __init__(self, month_pointer, path_to_temp, seg_pointer):
     self.month_pointer = month_pointer
     self.path_to_temp = path_to_temp
+    self.seg_pointer = seg_pointer
 
   def fit(self, X, y=None):
     return self
@@ -57,8 +59,8 @@ class ElevationForSegment( BaseEstimator, TransformerMixin):
     segments_ts["ele_X_speed_acc_p"]=ac_elevation_p
     segments_ts["ele_X_speed_acc_n"]=ac_elevation_n
 
-    gps_data.to_csv( self.path_to_temp + "EL_FC/" + self.month_pointer + "_gps_data.csv", index = False)
-    segments_ts.to_csv( self.path_to_temp + "EL_FC/" + self.month_pointer + "_segments.csv", index = False)
+    save_data(gps_data, self.path_to_temp + "EL_FC/" + self.seg_pointer +"/" , self.month_pointer + "_gps_data.csv")
+    save_data(segments_ts, self.path_to_temp + "EL_FC/" + self.seg_pointer +"/" , self.month_pointer + "_segments.csv")
     
      
     return gps_data,segments_ts

@@ -1,4 +1,5 @@
 from sklearn.base import BaseEstimator, TransformerMixin
+from utils.local.save_data import save_data
 from datetime import datetime, date
 import pandas as pd
 import geopandas as gpd
@@ -8,9 +9,10 @@ import numpy as np
 # put your AccelerationCalculator here
 class AccelerationCalculator( BaseEstimator, TransformerMixin):
   
-  def __init__(self, month_pointer, path_to_temp):
+  def __init__(self, month_pointer, path_to_temp, seg_pointer):
     self.month_pointer = month_pointer
     self.path_to_temp = path_to_temp
+    self.seg_pointer = seg_pointer
 
   def fit(self, X, y=None):
     return self
@@ -60,7 +62,7 @@ class AccelerationCalculator( BaseEstimator, TransformerMixin):
     segments_df['average_deacceleration'] = deacceleration_list
     segments_df['std_acc_dacc'] = std_acc_dacc_list
 
-    segments_df.to_csv( self.path_to_temp + "AC_CAL/" + self.month_pointer + "_segment_data.csv", index = False)
+    save_data(segments_df, self.path_to_temp + "AC_CAL/" + self.seg_pointer +"/" , self.month_pointer + "_segment_data.csv")
 
     return gps_data_ts, segments_df
 
