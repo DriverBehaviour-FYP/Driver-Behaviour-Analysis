@@ -1,4 +1,5 @@
 from sklearn.base import BaseEstimator, TransformerMixin
+from utils.local.save_data import save_data
 import pandas as pd
 from datetime import datetime, timedelta
 import math
@@ -6,11 +7,12 @@ import math
 
 class TripSegmenterByTime( BaseEstimator, TransformerMixin):
   
-  def __init__(self, month_pointer, path_to_temp, previous_segment_max, seg_duration_in_mins = 3):
+  def __init__(self, month_pointer, path_to_temp, previous_segment_max, seg_pointer = '3T'):
     self.month_pointer = month_pointer
     self.path_to_temp = path_to_temp
     self.previous_segment_max = previous_segment_max
-    self.seg_duration_in_mins = seg_duration_in_mins
+    self.seg_duration_in_mins = int(seg_pointer[:-1])
+    self.seg_pointer = seg_pointer
 
   def fit(self, X, y=None):
     return self
@@ -73,7 +75,7 @@ class TripSegmenterByTime( BaseEstimator, TransformerMixin):
     gps_data_ts["segment_id"] = segment_ids
 
     # saving point
-    gps_data_ts.to_csv( self.path_to_temp + "TR_SG_BT/" + self.month_pointer + "_gps_data.csv", index = False)
-    segments_df.to_csv( self.path_to_temp + "TR_SG_BT/" + self.month_pointer + "_segments.csv", index = False)
+    save_data(gps_data_ts, self.path_to_temp + "TR_SG_BT/"+ self.seg_pointer +"/" , self.month_pointer + "_gps_data.csv")
+    save_data(segments_df, self.path_to_temp + "TR_SG_BT/" + self.seg_pointer + "/" , self.month_pointer + "_segments.csv")
 
-    return gps_data_ts, segments_df, bus_trips_ts
+    return gps_data_ts, segments_df

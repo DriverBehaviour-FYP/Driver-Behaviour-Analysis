@@ -4,7 +4,7 @@ from components.preprocessing.dropper import Dropper
 from components.preprocessing.trip_extractor import TripExtractor
 from components.preprocessing.trip_segmeter import TripSegmenterByTime
 from components.preprocessing.elevation_injector import ElevationInjector
-from components.preprocessing.feature_calculator import FeatureCalculator
+from components.preprocessing.speed_feat_calculator import SpeedFeatureCalculator
 from components.preprocessing.standardizer import Standardizer
 from components.preprocessing.acceleration_calculator import AccelerationCalculator
 from components.preprocessing.stopping_frequency_for_segment import StoppingFrequencyForSegment
@@ -41,8 +41,12 @@ if __name__ == '__main__':
         raw_data = get_data_from_path(path_raw_data)
 
         # load data for feature calculation 
-        segemnts = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/AC_SF_CAL/' + month_pointer + "_segments.csv")
-        gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/AC_SF_CAL/' + month_pointer + "_gps_data.csv")
+        # segemnts = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP//' + month_pointer + "_segments.csv")
+        bus_trips = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_EX/' + month_pointer + "_bus_trips.csv")
+        trip_ends = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_EX/' + month_pointer + "_trip_ends.csv")
+        gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/EL_IJ/' + month_pointer + "_gps_data.csv")
+
+        seg_pointer = '10T'
 
         # config pipeline
         pipe = Pipeline([
@@ -50,18 +54,18 @@ if __name__ == '__main__':
             # ("dropper", Dropper(month_pointer, path_to_temp)),   # need a saving point here
             # ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
             # ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
-            # ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max )),   # need a saving point
-            ("CalculateFeatures", FeatureCalculator(month_pointer,path_to_temp))
-            # ("ElevationFeatureCalculator", ElevationForSegment(month_pointer,path_to_temp)),
-            # ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp)),
-            # ("StoppingFrequencyForSegment",StoppingFrequencyForSegment(month_pointer,path_to_temp)),
-            # ("CalculateRadialAcceleration",CalculateRadialAcceleration(month_pointer,path_to_temp)),
+            ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max, seg_pointer)),   # need a saving point
+            ("CalculateFeatures", SpeedFeatureCalculator(month_pointer,path_to_temp, seg_pointer)),
+            ("ElevationFeatureCalculator", ElevationForSegment(month_pointer,path_to_temp, seg_pointer)),
+            ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp, seg_pointer)),
+            ("StoppingFrequencyForSegment",StoppingFrequencyForSegment(month_pointer,path_to_temp, seg_pointer)),
+            # ("CalculateRadialAcceleration",CalculateRadialAcceleration(month_pointer,path_to_temp, seg_pointer)),
         ])
 
         # gps_data, segments, bus_trips = pipe.fit_transform((gps_data, segemnts))
-        gps_data, segments = pipe.fit_transform((gps_data, segemnts))
+        gps_data, segments = pipe.fit_transform((gps_data, bus_trips, trip_ends))
         # previous_trip_max += len(bus_trips)
-        # previous_segment_max += len(segments)
+        previous_segment_max += len(segments)
 
         
         
