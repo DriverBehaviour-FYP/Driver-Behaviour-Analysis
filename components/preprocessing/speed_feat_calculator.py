@@ -17,31 +17,26 @@ class SpeedFeatureCalculator(BaseEstimator, TransformerMixin):
         print(f"****************************Calculating Speed Features {self.month_pointer}")
         gps_data_df, segments_df = X
         max_speeds = []
-        speed_variences = []
-        speed_averages = []
+        speed_stds = []
+        speed_means = []
         for index, row in segments_df.iterrows():
             segment_id = row["segment_id"]
             speeds = gps_data_df[gps_data_df["segment_id"] == segment_id]["speed"].values
             if len(speeds) > 0:
                 max_speed = max(speeds)
-                variation = np.var(speeds)
+                speed_std = np.std(speeds)
+                speed_mean = np.mean(speeds, where=speeds>0)
             else:
                 max_speed = None
-                variation = None
+                speed_std = None
+                speed_mean = None
             max_speeds.append(max_speed)
-            speed_variences.append(variation)
+            speed_stds.append(speed_std)
+            speed_means.append(speed_mean)
 
-            # calculating non-zero speed sum
-            non_zero_speed_sum = 0
-            count = 0
-            for spd in speeds:
-                if spd>0:
-                    non_zero_speed_sum+= spd
-                    count+=1
-            speed_averages.append(non_zero_speed_sum/count if count!=0 else 0)
-        segments_df['average_speed'] = speed_averages
-        segments_df["max_speed"] = max_speeds
-        segments_df["speed_variation"] = speed_variences
+        segments_df['speed_mean'] = speed_means
+        segments_df["speed_max"] = max_speeds
+        segments_df["speed_std"] = speed_stds
 
         save_data(gps_data_df, self.path_to_temp + "SP_FC/" + self.seg_pointer+ "/" , self.month_pointer + "_gps_data.csv")
         save_data(segments_df, self.path_to_temp + "SP_FC/" + self.seg_pointer+ "/", self.month_pointer + "_segments.csv")
