@@ -21,8 +21,8 @@ class ElevationForSegment( BaseEstimator, TransformerMixin):
 
     elevation_p=[] #avg positive elevation for segments
     elevation_n=[] #avg negative elevation for segments
-    ac_elevation_p=[] #accumilated positive sum of elevation angle X avg speed of adjest two points
-    ac_elevation_n=[] #accumilated negative sum of elevation angle X avg speed of adjest two points
+    mul_elevation_p=[] #avg positive sum of elevation angle X avg speed of adjest two points
+    mul_elevation_n=[] #avg negative sum of elevation angle X avg speed of adjest two points
 
     for segment_id in segment_id_list:
       sum_elevation_p=0
@@ -51,13 +51,13 @@ class ElevationForSegment( BaseEstimator, TransformerMixin):
 
       elevation_p.append(sum_elevation_p/count_p if count_p!=0 else 0)
       elevation_n.append(sum_elevation_n/count_n if count_n!=0 else 0)
-      ac_elevation_p.append(ac_sum_elevation_p)
-      ac_elevation_n.append(ac_sum_elevation_n)
+      mul_elevation_p.append(ac_sum_elevation_p/count_p if count_p!=0 else 0)
+      mul_elevation_n.append(ac_sum_elevation_n/count_n if count_n!=0 else 0)
 
     segments_ts["elevation_p"]=elevation_p
     segments_ts["elevation_n"]=elevation_n
-    segments_ts["ele_X_speed_acc_p"]=ac_elevation_p
-    segments_ts["ele_X_speed_acc_n"]=ac_elevation_n
+    segments_ts["ele_X_speed_p"]=mul_elevation_p
+    segments_ts["ele_X_speed_n"]=mul_elevation_n
 
     save_data(gps_data, self.path_to_temp + "EL_FC/" + self.seg_pointer +"/" , self.month_pointer + "_gps_data.csv")
     save_data(segments_ts, self.path_to_temp + "EL_FC/" + self.seg_pointer +"/" , self.month_pointer + "_segments.csv")
