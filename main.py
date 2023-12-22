@@ -10,6 +10,7 @@ from components.preprocessing.acceleration_calculator import AccelerationCalcula
 from components.preprocessing.stopping_frequency_for_segment import StoppingFrequencyForSegment
 from components.preprocessing.elevation_feature import ElevationForSegment
 from components.preprocessing.radial_acceleration import CalculateRadialAcceleration
+from components.preprocessing.dwell_time_calculator import DwellTimeCalculator
 from sklearn.pipeline import Pipeline
 
 global previous_trip_max, previous_segment_max, month_pointer, bus_terminals, path_to_temp
@@ -47,7 +48,8 @@ if __name__ == '__main__':
         gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/EL_IJ/' + month_pointer + "_gps_data.csv")
 
         seg_pointer = '10T'
-
+        path_bus_trips = rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_EX/' + month_pointer + "_bus_trips.csv"
+        path_bus_stops =  rootPath + 'Raw-GPS-data-Kandy-Buses/more/bus_stops_654.csv'
         # config pipeline
         pipe = Pipeline([
             # ("cleaner", Cleaner(month_pointer)),
@@ -60,6 +62,8 @@ if __name__ == '__main__':
             ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp, seg_pointer)),
             ("StoppingFrequencyForSegment",StoppingFrequencyForSegment(month_pointer,path_to_temp, seg_pointer)),
             # ("CalculateRadialAcceleration",CalculateRadialAcceleration(month_pointer,path_to_temp, seg_pointer)),
+            ("DwellTimeCalculator",DwellTimeCalculator(month_pointer,path_bus_stops,path_bus_trips)),
+        
         ])
 
         # gps_data, segments, bus_trips = pipe.fit_transform((gps_data, segemnts))
