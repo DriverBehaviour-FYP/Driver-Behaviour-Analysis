@@ -1,13 +1,12 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from requests.exceptions import Timeout
-import requests
-from datetime import datetime, date
+from geopy.distance import geodesic
+import matplotlib.pyplot as plt
 import pandas as pd
-import geopandas as gpd
 import numpy as np
 
 
-class TripExtractor( BaseEstimator, TransformerMixin):
+class TripFilter( BaseEstimator, TransformerMixin):
   
   def __init__(self, month_pointer, path_to_temp):
     self.month_pointer = month_pointer
@@ -17,39 +16,59 @@ class TripExtractor( BaseEstimator, TransformerMixin):
     return self
 
   def transform(self, X):
-    gps_data,bus_trips,trip_ends = X
-    # global month_pointer, bus_terminals, path_to_temp, previous_trip_max
     print(f"****************************Trip Filtering {self.month_pointer}")
+    gps_data,bus_trips,trip_ends = X
 
-    # saving point
-    gps_data_2.to_csv( self.path_to_temp + "TR_EX/" + self.month_pointer + "_gps_data.csv", index = False)
-    bus_trips.to_csv( self.path_to_temp + "TR_EX/" + self.month_pointer + "_bus_trips.csv", index = False)
-    trip_ends.to_csv( self.path_to_temp + "TR_EX/" + self.month_pointer + "_trip_ends.csv", index = False)
+    split_points_path = "../../data/Raw-GPS-data-Kandy-Buses/MAIN/TEMP/SPLIT_POINTS/segment_split_points.csv"
+    split_points_df = pd.read_csv(split_points_path)
 
-    return   # returns gps_data dataframe with trip ids, and bus_trips dataframe
+    out = []
+
+    for index, row in bus_trips.iterrows():
+      # print("Procesing ",row['trip_id'] )
+      if row['direction']==1:
+        buff = split_points_df[::].copy()
+      else:
+        buff = split_points_df[::-1].reset_index(drop=True).copy()
+      max_index = np.max(np.where(gps_data['trip_id'] == row['trip_id']))
+      min_index = np.min(np.where(gps_data['trip_id'] == row['trip_id']))
+
+      acc_dis, count = 0, 0
+      per_count = (max_index-min_index+1) // len(buff)
   
+      for ind, row_buff in buff.iterrows():
+         buff_gps = (row_buff['latitude'], row_buff['longitude'])
+        #  print(f"Processing buff ind: {ind} through range {ind*per_count + min_index}-{min_index+(ind+1)*per_count}")
+         for i in range(min_index+ ind*per_count, min_index+ ind*per_count+ (5 if per_count>5 else per_count)):
+            try:
+              gps = (gps_data.loc[i]['latitude'], gps_data.loc[i]['longitude'])
+              acc_dis += geodesic(buff_gps, gps).meters
+              count += 1
+            except KeyError:
+               print(f"key error occured! trip ID: {row['trip_id']}")
 
-  def get_directions(self, origin, destination, timeout=5, max_retries=3):
-    base_url = "https://maps.googleapis.com/maps/api/directions/json"
+      out.append({"no_of_points": max_index-min_index+1, 'trip_id': row['trip_id'], 'kernel_value': acc_dis/count if count>0 else np.nan})
 
-    params = {
-        'origin': f"{origin[0]},{origin[1]}",
-        'destination': f"{destination[0]},{destination[1]}",
-        'key': "AIzaSyCz5uw3SrNct_Dqw6S6_D6AokxUVp0_hAg",
-    }
+    df = pd.DataFrame(out)
+    trip_ids_below_threshold = set(df[df['no_of_points']<50]['trip_id'])
+    trip_ids_not_in_route = set(df[(df['kernel_value']>2200)]['trip_id'])
 
-    for retry in range(max_retries):
-        try:
-            response = requests.get(base_url, params=params, timeout=timeout)
-            response.raise_for_status()  # Raise an HTTPError for bad responses
+    all = trip_ids_below_threshold.union(trip_ids_not_in_route)
+    print(f"Dropping {len(all)} trips")
 
-            # Parse and return the JSON response
-            return response.json()
-        except Timeout:
-            print(f"Timeout error. Retrying... ({retry + 1}/{max_retries})")
-        except requests.exceptions.RequestException as e:
-            print(f"Error: {e}")
+    # drop the trips which has low number of points than specified threshold
+    gps_data = gps_data.drop(gps_data[gps_data.trip_id.isin(trip_ids_below_threshold)].index)
+    bus_trips = bus_trips.drop(bus_trips[bus_trips.trip_id.isin(trip_ids_below_threshold)].index)
+    trip_ends = trip_ends.drop(trip_ends[trip_ends.trip_id.isin(trip_ids_below_threshold)].index)
 
-    # If all retries fail, return None or handle as needed
-    print(f"Failed after {max_retries} retries. Returning None.")
-    return None
+
+    # drops the trips that are not driven in the focussed route
+    gps_data = gps_data.drop(gps_data[gps_data.trip_id.isin(trip_ids_not_in_route)].index)
+    bus_trips = bus_trips.drop(bus_trips[bus_trips.trip_id.isin(trip_ids_not_in_route)].index)
+    trip_ends = trip_ends.drop(trip_ends[trip_ends.trip_id.isin(trip_ids_not_in_route)].index)
+
+    gps_data.reset_index(drop=True, inplace=True)
+    bus_trips.reset_index(drop=True, inplace=True)
+    trip_ends.reset_index(drop=True, inplace=True)
+
+    return gps_data, bus_trips, trip_ends
