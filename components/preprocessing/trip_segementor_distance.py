@@ -83,7 +83,7 @@ class TripSegmenterByDistance( BaseEstimator, TransformerMixin):
     gps_data_ts, bus_trips_ts = X
 
     # path to split points in temp
-    split_points_file_path = self.path_to_temp + "SPLIT_POINTS/" + f"{self.month_pointer}_split_points_{self.seg_pointer}.csv"
+    split_points_file_path = self.path_to_temp + "SPLIT_POINTS/" + f"segment_split_points_{self.seg_pointer}.csv"
 
     if os.path.exists(split_points_file_path):
       split_points_df = pd.read_csv(split_points_file_path)
@@ -100,8 +100,6 @@ class TripSegmenterByDistance( BaseEstimator, TransformerMixin):
 
     # segments to keep details of segments
     segments = []
-
-    split_points_arr = []
 
     for index, row in bus_trips_ts.iterrows():
     #   print(f"Processing trip-ID: {index+1} with dir: {row['direction']}")
@@ -127,7 +125,6 @@ class TripSegmenterByDistance( BaseEstimator, TransformerMixin):
           dist = geodesic(split_point, gps_point).meters
           if dist<=100:
             buff.loc[ind,'gps_data_index'] = i
-            split_points_arr.append({"latitude": gps_point[0], "longitude":gps_point[1]})
             break
       
       # assign gps_data_ts the segment_ids
@@ -138,6 +135,8 @@ class TripSegmenterByDistance( BaseEstimator, TransformerMixin):
         gps_data_ts.loc[start:end,'segment_id'] = segment_id
         # print(f"{type(end)} value: {end}  {np.isnan(end)}")
         segments.append({
+          'segment_id' : segment_id,
+          'road_section_id': i+1 if row['direction'] == 1 else (len(buff)+1 - i) * -1,
           'segment_starting_time': gps_data_ts.loc[start]['devicetime'] if not np.isnan(start) else np.nan,
           'segment_ending_time': gps_data_ts.loc[end]['devicetime'] if not np.isnan(end) else np.nan,
           'trip_id': row['trip_id'],
@@ -154,6 +153,8 @@ class TripSegmenterByDistance( BaseEstimator, TransformerMixin):
         if i== len(buff)-1 :
           gps_data_ts.loc[end:max_index,'segment_id'] = segment_id
           segments.append({
+            'segment_id' : segment_id,
+            'road_section_id': i+2 if row['direction'] == 1 else (len(buff) - i) * -1,
             'segment_starting_time': gps_data_ts.loc[end]['devicetime'] if not np.isnan(end) else np.nan,
             'segment_ending_time': gps_data_ts.loc[max_index]['devicetime'] if not np.isnan(max_index) else np.nan,
             'trip_id': row['trip_id'],
@@ -168,7 +169,6 @@ class TripSegmenterByDistance( BaseEstimator, TransformerMixin):
           segment_id += 1
     
     segments_out = pd.DataFrame(segments)
-    pd.DataFrame(split_points_arr).to_csv("./split_points_of_trips.csv", index=False)
     return gps_data_ts, segments_out
 
   def binary_search(self, gps_data, origin,starting_ind, max_ind, terminal_location):
