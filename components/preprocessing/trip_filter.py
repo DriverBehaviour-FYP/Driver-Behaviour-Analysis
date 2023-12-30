@@ -8,9 +8,10 @@ import numpy as np
 
 class TripFilter( BaseEstimator, TransformerMixin):
   
-  def __init__(self, month_pointer, path_to_temp):
+  def __init__(self, month_pointer, path_to_temp, path_split_points):
     self.month_pointer = month_pointer
     self.path_to_temp = path_to_temp
+    self.path_split_points = path_split_points
 
   def fit(self, X, y=None):
     return self
@@ -19,8 +20,8 @@ class TripFilter( BaseEstimator, TransformerMixin):
     print(f"****************************Trip Filtering {self.month_pointer}")
     gps_data,bus_trips,trip_ends = X
 
-    split_points_path = "../../data/Raw-GPS-data-Kandy-Buses/MAIN/TEMP/SPLIT_POINTS/segment_split_points.csv"
-    split_points_df = pd.read_csv(split_points_path)
+    # split_points_path = "../../data/Raw-GPS-data-Kandy-Buses/MAIN/TEMP/SPLIT_POINTS/segment_split_points.csv"
+    split_points_df = pd.read_csv(self.path_split_points)
 
     out = []
 

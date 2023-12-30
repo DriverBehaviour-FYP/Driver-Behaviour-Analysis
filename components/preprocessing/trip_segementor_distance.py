@@ -80,7 +80,7 @@ class TripSegmenterByDistance( BaseEstimator, TransformerMixin):
   def transform(self, X):
     print(f"****************************Trip Segmenting by Distance {self.month_pointer}")
     # splits data into gps data and the bus trips
-    gps_data_ts, bus_trips_ts = X
+    gps_data_ts, bus_trips_ts, trip_ends_ts = X
 
     # path to split points in temp
     split_points_file_path = self.path_to_temp + "SPLIT_POINTS/" + f"segment_split_points_{self.seg_pointer}.csv"
@@ -169,6 +169,9 @@ class TripSegmenterByDistance( BaseEstimator, TransformerMixin):
           segment_id += 1
     
     segments_out = pd.DataFrame(segments)
+
+    save_data(gps_data_ts, self.path_to_temp + "TR_SG_BD/"+ self.seg_pointer +"/" , self.month_pointer + "_gps_data.csv")
+    save_data(segments_out, self.path_to_temp + "TR_SG_BD/" + self.seg_pointer + "/" , self.month_pointer + "_segments.csv")
     return gps_data_ts, segments_out
 
   def binary_search(self, gps_data, origin,starting_ind, max_ind, terminal_location):
