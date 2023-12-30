@@ -10,6 +10,8 @@ from components.preprocessing.acceleration_calculator import AccelerationCalcula
 from components.preprocessing.stopping_frequency_for_segment import StoppingFrequencyForSegment
 from components.preprocessing.elevation_feature import ElevationForSegment
 from components.preprocessing.radial_acceleration import CalculateRadialAcceleration
+from components.preprocessing.trip_filter import TripFilter
+from components.preprocessing.trip_segementor_distance import TripSegmenterByDistance
 from sklearn.pipeline import Pipeline
 
 global previous_trip_max, previous_segment_max, month_pointer, bus_terminals, path_to_temp
@@ -26,6 +28,7 @@ if __name__ == '__main__':
 
     path_bus_terminals = rootPath + 'Raw-GPS-data-Kandy-Buses/more/bus_terminals_654.csv'
     path_to_temp = rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/'
+    path_1000M_split_points = path_to_temp + 'SPLIT_POINTS/segment_split_points_1000M.csv' 
 
 
     # load the raw data and the bus terminals
@@ -46,7 +49,8 @@ if __name__ == '__main__':
         trip_ends = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_EX/' + month_pointer + "_trip_ends.csv")
         gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/EL_IJ/' + month_pointer + "_gps_data.csv")
 
-        seg_pointer = '10T'
+        # seg_pointer = '10T'
+        seg_pointer = '1000M'
 
         # config pipeline
         pipe = Pipeline([
@@ -54,7 +58,9 @@ if __name__ == '__main__':
             # ("dropper", Dropper(month_pointer, path_to_temp)),   # need a saving point here
             # ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
             # ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
-            ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max, seg_pointer)),   # need a saving point
+            # ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max, seg_pointer)),
+            ("TripFilter", TripFilter(month_pointer, path_to_temp, path_1000M_split_points)),
+            ("TripSegmentorByDistance", TripSegmenterByDistance(month_pointer, path_to_temp, previous_segment_max, path_bus_terminals, precision=0.01, seg_pointer = '1000M')),
             ("CalculateFeatures", SpeedFeatureCalculator(month_pointer,path_to_temp, seg_pointer)),
             ("ElevationFeatureCalculator", ElevationForSegment(month_pointer,path_to_temp, seg_pointer)),
             ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp, seg_pointer)),
@@ -66,6 +72,9 @@ if __name__ == '__main__':
         gps_data, segments = pipe.fit_transform((gps_data, bus_trips, trip_ends))
         # previous_trip_max += len(bus_trips)
         previous_segment_max += len(segments)
+
+
+        # FIXME - made the code to recalculate split points if required precision for split points is higher than which can be found in the cache
 
         
         
