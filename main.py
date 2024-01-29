@@ -8,7 +8,7 @@ from components.preprocessing.speed_feat_calculator import SpeedFeatureCalculato
 from components.preprocessing.standardizer import Standardizer
 from components.preprocessing.acceleration_calculator import AccelerationCalculator
 from components.preprocessing.stopping_frequency_for_segment import StoppingFrequencyForSegment
-from components.preprocessing.elevation_feature import ElevationForSegment
+from components.preprocessing.elevation_feature_calculator import ElevationFeatureCalculator
 from components.preprocessing.radial_acceleration import CalculateRadialAcceleration
 from components.preprocessing.trip_filter import TripFilter
 from components.preprocessing.trip_segementor_distance import TripSegmenterByDistance
@@ -49,8 +49,8 @@ if __name__ == '__main__':
         trip_ends = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_EX/' + month_pointer + "_trip_ends.csv")
         gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/EL_IJ/' + month_pointer + "_gps_data.csv")
 
-        # seg_pointer = '10T'
-        seg_pointer = '1000M'
+        seg_pointer = '10T'
+        # seg_pointer = '1000M'
 
         # config pipeline
         pipe = Pipeline([
@@ -58,11 +58,11 @@ if __name__ == '__main__':
             # ("dropper", Dropper(month_pointer, path_to_temp)),   # need a saving point here
             # ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
             # ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
-            # ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max, seg_pointer)),
             ("TripFilter", TripFilter(month_pointer, path_to_temp, path_1000M_split_points)),
-            ("TripSegmentorByDistance", TripSegmenterByDistance(month_pointer, path_to_temp, previous_segment_max, path_bus_terminals, precision=0.01, seg_pointer = '1000M')),
+            ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max, seg_pointer)),
+            # ("TripSegmentorByDistance", TripSegmenterByDistance(month_pointer, path_to_temp, previous_segment_max, path_bus_terminals, precision=0.01, seg_pointer = '1000M')),
             ("CalculateFeatures", SpeedFeatureCalculator(month_pointer,path_to_temp, seg_pointer)),
-            ("ElevationFeatureCalculator", ElevationForSegment(month_pointer,path_to_temp, seg_pointer)),
+            ("ElevationFeatureCalculator", ElevationFeatureCalculator(month_pointer,path_to_temp, seg_pointer)),
             ("AccelerationCalculator", AccelerationCalculator(month_pointer,path_to_temp, seg_pointer)),
             ("StoppingFrequencyForSegment",StoppingFrequencyForSegment(month_pointer,path_to_temp, seg_pointer)),
             # ("CalculateRadialAcceleration",CalculateRadialAcceleration(month_pointer,path_to_temp, seg_pointer)),
