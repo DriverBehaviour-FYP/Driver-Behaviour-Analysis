@@ -25,6 +25,9 @@ class AccelerationCalculator( BaseEstimator, TransformerMixin):
 
     acceleration_list = []
     deacceleration_list = []
+    acceleration_max_list = []
+    deacceleration_max_list = []
+    no_of_points_list = []
     # acceleration_sd_list = []
     # deacceleration_sd_list = []
     std_acc_dacc_list =[]
@@ -56,11 +59,21 @@ class AccelerationCalculator( BaseEstimator, TransformerMixin):
         deacceleration_list.append(deacceleration)
         acceleration_list.append(acceleration)
         std_acc_dacc_list.append(std_acc_dacc)
+
+        # calculate maximums
+        acceleration_max_list.append(max(positive_accelerations) if len(positive_accelerations)>0 else 0)
+        deacceleration_max_list.append(min(negative_accelerations) if len(negative_accelerations)>0 else 0)
+        no_of_points_list.append(len(select_segment))
         
     segments_df = segments_ts.copy()
     segments_df['average_acceleration'] = acceleration_list
     segments_df['average_deacceleration'] = deacceleration_list
     segments_df['std_acc_dacc'] = std_acc_dacc_list
+
+    # add maximums to the dataframe
+    segments_df['max_acceleration'] = acceleration_max_list
+    segments_df['max_deacceleration'] = deacceleration_max_list
+    segments_df['no_data_points'] = no_of_points_list
 
     save_data(segments_df, self.path_to_temp + "AC_CAL/" + self.seg_pointer +"/" , self.month_pointer + "_segment_data.csv")
 
