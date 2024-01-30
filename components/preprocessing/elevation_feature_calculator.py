@@ -28,6 +28,8 @@ class ElevationFeatureCalculator( BaseEstimator, TransformerMixin):
     max_elevation_n_list = []
     max_mul_elevation_p_list = []
     max_mul_elevation_n_list = []
+    p_counts_list = []
+    n_counts_list = []
 
     for segment_id in segment_id_list:
       sum_elevation_p=0
@@ -85,6 +87,8 @@ class ElevationFeatureCalculator( BaseEstimator, TransformerMixin):
       max_elevation_n_list.append(max_elevation_n)
       max_mul_elevation_p_list.append(max_mul_elevation_p)
       max_mul_elevation_n_list.append(max_mul_elevation_n)
+      p_counts_list.append(count_p)
+      n_counts_list.append(count_n)
 
     segments_ts["elevation_p"]=elevation_p
     segments_ts["elevation_n"]=elevation_n
@@ -96,6 +100,8 @@ class ElevationFeatureCalculator( BaseEstimator, TransformerMixin):
     segments_ts['max_elevation_n'] = max_elevation_n_list
     segments_ts['max_ele_X_speed_p'] = max_mul_elevation_p_list
     segments_ts['max_ele_X_speed_n'] = max_mul_elevation_n_list
+    segments_ts['eleXspeed_count_p'] = p_counts_list
+    segments_ts['eleXspeed_count_n'] = n_counts_list
 
     save_data(gps_data, self.path_to_temp + "EL_FC/" + self.seg_pointer +"/" , self.month_pointer + "_gps_data.csv")
     save_data(segments_ts, self.path_to_temp + "EL_FC/" + self.seg_pointer +"/" , self.month_pointer + "_segments.csv")
