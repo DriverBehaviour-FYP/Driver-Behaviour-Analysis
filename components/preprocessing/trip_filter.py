@@ -72,4 +72,8 @@ class TripFilter( BaseEstimator, TransformerMixin):
     bus_trips.reset_index(drop=True, inplace=True)
     trip_ends.reset_index(drop=True, inplace=True)
 
+    gps_data.to_csv( self.path_to_temp + "TR_FL/" + self.month_pointer + "_gps_data.csv", index = False)
+    bus_trips.to_csv( self.path_to_temp + "TR_FL/" + self.month_pointer + "_bus_trips.csv", index = False)
+    trip_ends.to_csv( self.path_to_temp + "TR_FL/" + self.month_pointer + "_trip_ends.csv", index = False)
+
     return gps_data, bus_trips, trip_ends
