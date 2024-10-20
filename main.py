@@ -49,7 +49,7 @@ if __name__ == '__main__':
         trip_ends = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/TR_EX/' + month_pointer + "_trip_ends.csv")
         gps_data = get_data_from_path(rootPath + 'Raw-GPS-data-Kandy-Buses/MAIN/TEMP/EL_IJ/' + month_pointer + "_gps_data.csv")
 
-        # seg_pointer = '10T'
+        # seg_pointer = '15T'
         seg_pointer = '1000M'
 
         # config pipeline
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             # ("TripExtractor", TripExtractor(month_pointer, path_to_temp, previous_trip_max, bus_terminals )),   # need a saving point
             # ("InjectElevations",ElevationInjector(month_pointer, path_to_temp)),  # save point there
             ("TripFilter", TripFilter(month_pointer, path_to_temp, path_1000M_split_points)),
-            # ("TripSegmentor", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max, seg_pointer)),
+            # ("TripSegmentorByTime", TripSegmenterByTime(month_pointer, path_to_temp, previous_segment_max, seg_pointer)),
             ("TripSegmentorByDistance", TripSegmenterByDistance(month_pointer, path_to_temp, previous_segment_max, path_bus_terminals, precision=0.01, seg_pointer = '1000M')),
             ("CalculateFeatures", SpeedFeatureCalculator(month_pointer,path_to_temp, seg_pointer)),
             ("ElevationFeatureCalculator", ElevationFeatureCalculator(month_pointer,path_to_temp, seg_pointer)),
